@@ -1,24 +1,17 @@
 package com.simple.discussion
 
-import com.simple.discussion.dao.IssueEntity
-import com.simple.discussion.dao.IssueTable
-import com.simple.discussion.model.Issue
+import com.simple.discussion.service.issueRoute
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
-import io.ktor.request.receive
-import io.ktor.response.respond
 import io.ktor.response.respondText
 import io.ktor.routing.Routing
 import io.ktor.routing.get
-import io.ktor.routing.post
 import io.ktor.routing.routing
 import io.ktor.serialization.json
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 
@@ -37,35 +30,11 @@ fun Application.module(testing: Boolean = false) {
 
     routing {
         root()
-
-        post("/issues") {
-            val postedIssue = call.receive<Issue>()
-
-            val savedIssue = transaction {
-                SchemaUtils.create(IssueTable)
-                IssueEntity.new {
-                    title = postedIssue.title
-                    description = postedIssue.description
-                }.toModel()
-            }
-
-            call.respond(savedIssue)
-        }
-
-        get("/issues") {
-            val issues = transaction {
-                IssueEntity.all().map { it.toModel()}
-            }
-
-            call.respond(issues)
-        }
+        issueRoute()
     }
 }
 
 fun Routing.root() {
-    get("/") {
-        call.respondText("Hello, World!", ContentType.Text.Html)
-    }
     get("/health_check") {
         call.respondText("OK", ContentType.Text.Html)
     }
