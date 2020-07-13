@@ -4,11 +4,12 @@ import com.simple.discussion.dao.IssueEntity
 import com.simple.discussion.dao.IssueTable
 import com.simple.discussion.model.Issue
 import io.ktor.application.call
+import io.ktor.http.HttpHeaders.Location
+import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
+import io.ktor.response.header
 import io.ktor.response.respond
-import io.ktor.routing.Routing
-import io.ktor.routing.get
-import io.ktor.routing.post
+import io.ktor.routing.*
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -22,7 +23,19 @@ object IssueApplicationService {
     }
 
     fun get() = transaction {
-        IssueEntity.all().map { it.toModel()}
+        IssueEntity.all().map { it.toModel() }
+    }
+
+    fun update(updatedIssue: Issue) = transaction {
+        IssueEntity[updatedIssue.id].apply {
+            title = updatedIssue.title
+            description = updatedIssue.description
+            flush()
+        }.toModel()
+    }
+
+    fun delete(issueId: Int) = transaction {
+        IssueEntity[issueId].delete()
     }
 }
 
@@ -30,11 +43,34 @@ fun Routing.issueRoute() {
     post("/issues") {
         val postedIssue = call.receive<Issue>()
         val savedIssue = IssueApplicationService.add(postedIssue)
-        call.respond(savedIssue)
+
+        call.response.header(Location, "/issues/${savedIssue.id}")
+        call.respond(HttpStatusCode.Created, savedIssue)
     }
 
     get("/issues") {
         val issues = IssueApplicationService.get()
-        call.respond(issues)
+
+        call.respond(HttpStatusCode.OK, issues)
+    }
+
+    put("/issues/{id}") {
+        val issueId = call.parameters["id"]?.toInt()
+
+        issueId?.let {
+            val postedIssue = call.receive<Issue>()
+                .copy(id = it)
+            IssueApplicationService.update(postedIssue)
+        }
+
+        call.respond(HttpStatusCode.NoContent)
+    }
+
+    delete("/issues/{id}") {
+        val issueId = call.parameters["id"]?.toInt()
+        issueId?.let {
+            IssueApplicationService.delete(it)
+        }
+        call.respond(HttpStatusCode.NoContent)
     }
 }
