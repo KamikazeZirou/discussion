@@ -1,6 +1,5 @@
 package com.simple.discussion.service
 
-import com.simple.discussion.exposed.dao.ExposedIssueRepository
 import com.simple.discussion.model.Issue
 import com.simple.discussion.repository.IIssueRepository
 import io.ktor.application.call
@@ -10,10 +9,11 @@ import io.ktor.request.receive
 import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.*
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 
-object IssueApplicationService {
-    // TODO DI
-    private val repository: IIssueRepository = ExposedIssueRepository()
+object IssueApplicationService: KoinComponent {
+    private val repository: IIssueRepository by inject()
 
     fun add(issue: Issue) = repository.add(issue)
 
