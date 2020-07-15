@@ -1,4 +1,4 @@
-package com.simple.discussion.dao
+package com.simple.discussion.exposed.dao
 
 import com.simple.discussion.model.Issue
 import org.jetbrains.exposed.dao.IntEntity
@@ -12,7 +12,9 @@ object IssueTable: IntIdTable() {
 }
 
 class IssueEntity(id: EntityID<Int>): IntEntity(id) {
-    companion object: IntEntityClass<IssueEntity>(IssueTable)
+    companion object: IntEntityClass<IssueEntity>(
+        IssueTable
+    )
 
     var title by IssueTable.title
     var description by IssueTable.description

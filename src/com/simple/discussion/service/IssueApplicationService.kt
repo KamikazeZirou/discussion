@@ -1,8 +1,8 @@
 package com.simple.discussion.service
 
-import com.simple.discussion.dao.IssueEntity
-import com.simple.discussion.dao.IssueTable
+import com.simple.discussion.exposed.dao.ExposedIssueRepository
 import com.simple.discussion.model.Issue
+import com.simple.discussion.repository.IIssueRepository
 import io.ktor.application.call
 import io.ktor.http.HttpHeaders.Location
 import io.ktor.http.HttpStatusCode
@@ -10,33 +10,18 @@ import io.ktor.request.receive
 import io.ktor.response.header
 import io.ktor.response.respond
 import io.ktor.routing.*
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.transactions.transaction
 
 object IssueApplicationService {
-    fun add(issue: Issue) = transaction {
-        SchemaUtils.create(IssueTable)
-        IssueEntity.new {
-            title = issue.title
-            description = issue.description
-        }.toModel()
-    }
+    // TODO DI
+    private val repository: IIssueRepository = ExposedIssueRepository()
 
-    fun get() = transaction {
-        IssueEntity.all().map { it.toModel() }
-    }
+    fun add(issue: Issue) = repository.add(issue)
 
-    fun update(updatedIssue: Issue) = transaction {
-        IssueEntity[updatedIssue.id].apply {
-            title = updatedIssue.title
-            description = updatedIssue.description
-            flush()
-        }.toModel()
-    }
+    fun get() = repository.get()
 
-    fun delete(issueId: Int) = transaction {
-        IssueEntity[issueId].delete()
-    }
+    fun update(issue: Issue) = repository.update(issue)
+
+    fun delete(issueId: Int) = repository.delete(issueId)
 }
 
 fun Routing.issueRoute() {
