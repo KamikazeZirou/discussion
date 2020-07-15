@@ -1,6 +1,6 @@
 package com.simple.discussion
 
-import com.simple.discussion.di.myModule
+import com.simple.discussion.di.issueModule
 import com.simple.discussion.service.issueRoute
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -25,7 +25,7 @@ fun Application.module(testing: Boolean = false) {
     Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
 
     startKoin {
-        modules(myModule)
+        modules(issueModule)
     }
 
     install(ContentNegotiation) {
