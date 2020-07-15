@@ -20,10 +20,12 @@ fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
 @Suppress("unused") // Referenced in application.conf
 @kotlin.jvm.JvmOverloads
 fun Application.module(testing: Boolean = false) {
-    // DB_CLOSE_DELAY=-1は、コネクションを全て閉じても、DBをシャットダウンしないという意味
-    // この指定がないとリクエストのたびに、Dataが消えてしまう
-    Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
 
+    if (!testing) {
+        // DB_CLOSE_DELAY=-1は、コネクションを全て閉じても、DBをシャットダウンしないという意味
+        // この指定がないとリクエストのたびに、Dataが消えてしまう
+        Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
+    }
     startKoin {
         modules(issueModule)
     }
