@@ -1,6 +1,8 @@
 package com.simple.discussion.test
 
 import com.google.common.truth.Truth.assertThat
+import com.simple.discussion.database.IDatabase
+import com.simple.discussion.di.issueModule
 import com.simple.discussion.model.Issue
 import com.simple.discussion.module
 import io.ktor.http.ContentType
@@ -15,28 +17,30 @@ import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.parseList
 import kotlinx.serialization.stringify
-import org.jetbrains.exposed.sql.Database
 import org.junit.After
 import org.junit.Before
+import org.koin.core.KoinComponent
+import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
+import org.koin.core.inject
 import kotlin.test.Test
 
 @OptIn(UnstableDefault::class)
-internal class ApplicationTest {
-    // TODO DIする。Exposedであることを意識する必要ないテストなので
-    private lateinit var database: Database
+internal class ApplicationTest: KoinComponent {
+    private val database: IDatabase by inject()
 
     @Before
     fun setUp() {
-        database = Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
+        startKoin {
+            modules(issueModule)
+        }
+        database.connect()
     }
 
     @After
     fun teardown() {
         stopKoin()
-        val e = database.connector.invoke().prepareStatement("DROP ALL OBJECTS", arrayOf())
-        e.executeUpdate()
-        database.connector.invoke().close()
+        database.cleanup()
     }
 
     @Test

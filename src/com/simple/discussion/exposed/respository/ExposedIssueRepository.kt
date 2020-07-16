@@ -1,5 +1,7 @@
-package com.simple.discussion.exposed.dao
+package com.simple.discussion.exposed.respository
 
+import com.simple.discussion.exposed.dao.IssueEntity
+import com.simple.discussion.exposed.dao.IssueTable
 import com.simple.discussion.model.Issue
 import com.simple.discussion.repository.IIssueRepository
 import org.jetbrains.exposed.sql.SchemaUtils
