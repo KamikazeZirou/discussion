@@ -1,10 +1,7 @@
 object Versions {
     const val kotlin = "1.3.72"
     const val ktor = "1.3.2"
-    const val logback= "1.2.1"
     const val exposed = "0.24.1"
-    const val koin = "2.1.6"
-    const val truth = "1.0.1"
 }
 
 object Deps {
@@ -14,9 +11,9 @@ object Deps {
 
     object Ktor {
         const val serverNetty = "io.ktor:ktor-server-netty:${Versions.ktor}"
-        const val logback = "ch.qos.logback:logback-classic:${Versions.logback}"
+        const val logback = "ch.qos.logback:logback-classic:1.2.1"
         const val serialization = "io.ktor:ktor-serialization:${Versions.ktor}"
-        const val koin = "org.koin:koin-ktor:${Versions.koin}"
+        const val koin = "org.koin:koin-ktor:2.1.6"
     }
 
     object Database {
@@ -36,5 +33,5 @@ object TestDeps {
         const val serverTestHost = "io.ktor:ktor-server-test-host:${Versions.ktor}"
     }
 
-    const val truth = "com.google.truth:truth:${Versions.truth}"
+    const val truth = "com.google.truth:truth:1.0.1"
 }
