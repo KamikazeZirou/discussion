@@ -12,14 +12,16 @@ object IssueTable: IntIdTable() {
 }
 
 class IssueEntity(id: EntityID<Int>): IntEntity(id) {
-    companion object: IntEntityClass<IssueEntity>(
-        IssueTable
-    )
+    companion object: IntEntityClass<IssueEntity>(IssueTable)
 
     var title by IssueTable.title
     var description by IssueTable.description
+    private val labels by LabelEntity referrersOn LabelTable.issue
 
-    fun toModel(): Issue {
-        return Issue(id.value, title, description)
-    }
+    fun toModel(): Issue = Issue(
+        id.value,
+        title,
+        description,
+        labels.map { it.value }
+    )
 }

@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class Issue(
     val id: Int = -1,
     val title: String,
-    val description: String
+    val description: String,
+    val labels: List<String>
 )

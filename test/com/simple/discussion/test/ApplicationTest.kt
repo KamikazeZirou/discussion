@@ -26,7 +26,7 @@ import org.koin.core.inject
 import kotlin.test.Test
 
 @OptIn(UnstableDefault::class)
-internal class ApplicationTest: KoinComponent {
+internal class ApplicationTest : KoinComponent {
     private val database: IDatabase by inject()
 
     @Before
@@ -44,7 +44,7 @@ internal class ApplicationTest: KoinComponent {
     }
 
     @Test
-    fun testHealthCheck() = withTestApplication( { module(testing = true) }) {
+    fun testHealthCheck() = withTestApplication({ module(testing = true) }) {
         with(handleRequest(HttpMethod.Get, "/health_check")) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
             assertThat(response.content).isEqualTo("OK")
@@ -53,11 +53,15 @@ internal class ApplicationTest: KoinComponent {
 
     @ImplicitReflectionSerializer
     @Test
-    fun testPostIssue() = withTestApplication( { module(testing = true) }) {
+    fun testPostIssue() = withTestApplication({ module(testing = true) }) {
 
         val call = handleRequest(HttpMethod.Post, "/issues") {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(title = "test issue", description = "test description")
+            val issue = Issue(
+                title = "test issue",
+                description = "test description",
+                labels = listOf("新機能")
+            )
             setBody(Json.stringify(issue))
         }
 
@@ -66,22 +70,31 @@ internal class ApplicationTest: KoinComponent {
             val issue = Json.parse(Issue.serializer(), response.content!!)
             assertThat(issue.title).isEqualTo("test issue")
             assertThat(issue.description).isEqualTo("test description")
+            assertThat(issue.labels).isEqualTo(listOf("新機能"))
         }
     }
 
     @ImplicitReflectionSerializer
     @Test
-    fun testGetIssue() = withTestApplication( { module(testing = true) }) {
+    fun testGetIssue() = withTestApplication({ module(testing = true) }) {
 
         handleRequest(HttpMethod.Post, "/issues") {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(title = "test issue1", description = "test description1")
+            val issue = Issue(
+                title = "test issue1",
+                description = "test description1",
+                labels = listOf("新機能")
+            )
             setBody(Json.stringify(issue))
         }
 
         handleRequest(HttpMethod.Post, "/issues") {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(title = "test issue2", description = "test description2")
+            val issue = Issue(
+                title = "test issue2",
+                description = "test description2",
+                labels = listOf("不具合", "優先度高")
+            )
             setBody(Json.stringify(issue))
         }
 
@@ -93,8 +106,10 @@ internal class ApplicationTest: KoinComponent {
             val issues = Json.parseList<Issue>(response.content!!)
             assertThat(issues[0].title).isEqualTo("test issue1")
             assertThat(issues[0].description).isEqualTo("test description1")
+            assertThat(issues[0].labels).isEqualTo(listOf("新機能"))
             assertThat(issues[1].title).isEqualTo("test issue2")
             assertThat(issues[1].description).isEqualTo("test description2")
+            assertThat(issues[1].labels).isEqualTo(listOf("不具合", "優先度高"))
         }
     }
 }
