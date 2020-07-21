@@ -8,14 +8,14 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 object CommentTable: IntIdTable() {
     val description = text("description")
-    val issue = reference("issue", IssueTable)
+    val issueId = integer("issue_id").references(IssueTable.id)
 }
 
 class CommentEntity(id: EntityID<Int>): IntEntity(id) {
     companion object: IntEntityClass<CommentEntity>(CommentTable)
 
     var description by CommentTable.description
-    var issue by IssueEntity referencedOn CommentTable.issue
+    var issueId by  CommentTable.issueId
 
     fun toModel(): Comment = Comment(id.value, description)
 }

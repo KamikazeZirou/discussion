@@ -2,6 +2,7 @@ package com.simple.discussion
 
 import com.simple.discussion.database.IDatabase
 import com.simple.discussion.di.issueModule
+import com.simple.discussion.service.commentRoute
 import com.simple.discussion.service.issueRoute
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -40,6 +41,7 @@ fun Application.module(testing: Boolean = false) {
     routing {
         root()
         issueRoute()
+        commentRoute()
     }
 }
 

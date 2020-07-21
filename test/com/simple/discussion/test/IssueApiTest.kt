@@ -26,7 +26,7 @@ import org.koin.core.inject
 import kotlin.test.Test
 
 @OptIn(UnstableDefault::class)
-internal class ApplicationTest : KoinComponent {
+internal class IssueApiTest : KoinComponent {
     private val database: IDatabase by inject()
 
     @Before
