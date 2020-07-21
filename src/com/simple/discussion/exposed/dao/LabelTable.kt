@@ -7,7 +7,6 @@ import org.jetbrains.exposed.dao.id.IntIdTable
 
 object LabelTable: IntIdTable() {
     val value = varchar("value", 64)
-    // IssueTableへの外部キー
     val issue = reference("issue", IssueTable)
 }
 
