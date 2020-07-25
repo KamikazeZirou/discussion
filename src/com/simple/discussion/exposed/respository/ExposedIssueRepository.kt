@@ -7,6 +7,7 @@ import com.simple.discussion.exposed.dao.LabelTable
 import com.simple.discussion.model.Issue
 import com.simple.discussion.repository.IIssueRepository
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class ExposedIssueRepository : IIssueRepository {
@@ -34,11 +35,24 @@ class ExposedIssueRepository : IIssueRepository {
     }
 
     override fun update(issue: Issue): Issue = transaction {
-        IssueEntity[issue.id].apply {
+        val updatedIssue = IssueEntity[issue.id].apply {
             title = issue.title
             description = issue.description
             flush()
-        }.toModel()
+        }
+
+        // 一旦全てのラベルを消す
+        LabelTable.deleteWhere { LabelTable.issue.eq(updatedIssue.id) }
+
+        // ラベルを作りなおす
+        issue.labels.forEach {
+            LabelEntity.new {
+                this.value = it
+                this.issue = updatedIssue
+            }
+        }
+
+        updatedIssue.toModel()
     }
 
     override fun delete(issueId: Int) = transaction {

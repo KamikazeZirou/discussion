@@ -5,6 +5,7 @@ import com.simple.discussion.database.IDatabase
 import com.simple.discussion.di.issueModule
 import com.simple.discussion.model.Issue
 import com.simple.discussion.module
+import com.simple.discussion.test.util.postIssue
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -25,6 +26,7 @@ import org.koin.core.context.stopKoin
 import org.koin.core.inject
 import kotlin.test.Test
 
+@ImplicitReflectionSerializer
 @OptIn(UnstableDefault::class)
 internal class IssueApiTest : KoinComponent {
     private val database: IDatabase by inject()
@@ -44,17 +46,7 @@ internal class IssueApiTest : KoinComponent {
     }
 
     @Test
-    fun testHealthCheck() = withTestApplication({ module(testing = true) }) {
-        with(handleRequest(HttpMethod.Get, "/health_check")) {
-            assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
-            assertThat(response.content).isEqualTo("OK")
-        }
-    }
-
-    @ImplicitReflectionSerializer
-    @Test
     fun testPostIssue() = withTestApplication({ module(testing = true) }) {
-
         val call = handleRequest(HttpMethod.Post, "/issues") {
             addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             val issue = Issue(
@@ -74,32 +66,20 @@ internal class IssueApiTest : KoinComponent {
         }
     }
 
-    @ImplicitReflectionSerializer
     @Test
     fun testGetIssue() = withTestApplication({ module(testing = true) }) {
+        postIssue(Issue(
+            title = "test issue1",
+            description = "test description1",
+            labels = listOf("新機能")))
 
-        handleRequest(HttpMethod.Post, "/issues") {
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(
-                title = "test issue1",
-                description = "test description1",
-                labels = listOf("新機能")
-            )
-            setBody(Json.stringify(issue))
-        }
+        postIssue(Issue(
+            title = "test issue2",
+            description = "test description2",
+            labels = listOf("不具合", "優先度高")
+        ))
 
-        handleRequest(HttpMethod.Post, "/issues") {
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(
-                title = "test issue2",
-                description = "test description2",
-                labels = listOf("不具合", "優先度高")
-            )
-            setBody(Json.stringify(issue))
-        }
-
-        val call = handleRequest(HttpMethod.Get, "/issues") {
-        }
+        val call = handleRequest(HttpMethod.Get, "/issues") {}
 
         with(call) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
@@ -110,6 +90,65 @@ internal class IssueApiTest : KoinComponent {
             assertThat(issues[1].title).isEqualTo("test issue2")
             assertThat(issues[1].description).isEqualTo("test description2")
             assertThat(issues[1].labels).isEqualTo(listOf("不具合", "優先度高"))
+        }
+    }
+
+    @Test
+    fun testPutIssue() = withTestApplication({ module(testing = true) }) {
+        val postedIssue = postIssue(Issue(
+            title = "test issue1",
+            description = "test description1",
+            labels = listOf("新機能")))
+
+        val putCall = handleRequest(HttpMethod.Put, "/issues/${postedIssue.id}") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            val issue = postedIssue.copy(
+                title = "test issue2",
+                description = "test description2",
+                labels = listOf()
+            )
+            setBody(Json.stringify(issue))
+        }
+
+        with(putCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.NoContent)
+        }
+
+        val getCall = handleRequest(HttpMethod.Get, "/issues") {}
+
+        with(getCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
+            val issues = Json.parseList<Issue>(response.content!!)
+            assertThat(issues[0].title).isEqualTo("test issue2")
+            assertThat(issues[0].description).isEqualTo("test description2")
+            assertThat(issues[0].labels).isEqualTo(listOf<String>())
+        }
+    }
+
+    @Test
+    fun testDeleteIssue() = withTestApplication({ module(testing = true) }) {
+        val postedIssue = postIssue(
+            Issue(
+                title = "test issue1",
+                description = "test description1",
+                labels = listOf("新機能")
+            )
+        )
+
+        val deleteCall = handleRequest(HttpMethod.Delete, "/issues/${postedIssue.id}") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        }
+
+        with(deleteCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.NoContent)
+        }
+
+        val getCall = handleRequest(HttpMethod.Get, "/issues") {}
+
+        with(getCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
+            val issues = Json.parseList<Issue>(response.content!!)
+            assertThat(issues).isEmpty()
         }
     }
 }

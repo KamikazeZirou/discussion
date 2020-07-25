@@ -6,10 +6,11 @@ import com.simple.discussion.di.issueModule
 import com.simple.discussion.model.Comment
 import com.simple.discussion.model.Issue
 import com.simple.discussion.module
+import com.simple.discussion.test.util.postIssue
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
-import io.ktor.server.testing.TestApplicationEngine
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
@@ -44,23 +45,13 @@ internal class CommentApiTest : KoinComponent {
         database.cleanup()
     }
 
-    private fun TestApplicationEngine.postIssue(): Issue {
-        // Issueを投稿する
-        val postIssueCall = handleRequest(HttpMethod.Post, "/issues") {
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(
-                title = "test issue",
-                description = "test description",
-                labels = listOf()
-            )
-            setBody(Json.stringify(issue))
-        }
-        return Json.parse(Issue.serializer(), postIssueCall.response.content!!)
-    }
-
     @Test
     fun testPostComment() = withTestApplication({ module(testing = true) }) {
-        val issue = postIssue()
+        val issue = postIssue(Issue(
+            title = "test issue",
+            description = "test description",
+            labels = listOf()
+        ))
 
         // Commentを投稿する
         val postCommentCall = handleRequest(HttpMethod.Post, "/issues/${issue.id}/comments") {
@@ -71,7 +62,7 @@ internal class CommentApiTest : KoinComponent {
 
         // Commentを投稿できたか確認する
         with(postCommentCall) {
-            assertThat(response.status()).isEqualTo(io.ktor.http.HttpStatusCode.Created)
+            assertThat(response.status()).isEqualTo(HttpStatusCode.Created)
             val comment = Json.parse(Comment.serializer(), response.content!!)
             assertThat(comment.id).isGreaterThan(0)
             assertThat(comment.description).isEqualTo("test comment")
