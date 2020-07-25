@@ -25,37 +25,39 @@ object IssueApplicationService: KoinComponent {
 }
 
 fun Routing.issueRoute() {
-    post("/issues") {
-        val postedIssue = call.receive<Issue>()
-        val savedIssue = IssueApplicationService.add(postedIssue)
-
-        call.response.header(Location, "/issues/${savedIssue.id}")
-        call.respond(HttpStatusCode.Created, savedIssue)
-    }
-
-    get("/issues") {
-        val issues = IssueApplicationService.get()
-
-        call.respond(HttpStatusCode.OK, issues)
-    }
-
-    put("/issues/{id}") {
-        val issueId = call.parameters["id"]?.toInt()
-
-        issueId?.let {
+    route("/issues") {
+        post {
             val postedIssue = call.receive<Issue>()
-                .copy(id = it)
-            IssueApplicationService.update(postedIssue)
+            val savedIssue = IssueApplicationService.add(postedIssue)
+
+            call.response.header(Location, "/issues/${savedIssue.id}")
+            call.respond(HttpStatusCode.Created, savedIssue)
         }
 
-        call.respond(HttpStatusCode.NoContent)
-    }
+        get {
+            val issues = IssueApplicationService.get()
 
-    delete("/issues/{id}") {
-        val issueId = call.parameters["id"]?.toInt()
-        issueId?.let {
-            IssueApplicationService.delete(it)
+            call.respond(HttpStatusCode.OK, issues)
         }
-        call.respond(HttpStatusCode.NoContent)
+
+        put("{id}") {
+            val issueId = call.parameters["id"]?.toInt()
+
+            issueId?.let {
+                val postedIssue = call.receive<Issue>()
+                    .copy(id = it)
+                IssueApplicationService.update(postedIssue)
+            }
+
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        delete("{id}") {
+            val issueId = call.parameters["id"]?.toInt()
+            issueId?.let {
+                IssueApplicationService.delete(it)
+            }
+            call.respond(HttpStatusCode.NoContent)
+        }
     }
 }
