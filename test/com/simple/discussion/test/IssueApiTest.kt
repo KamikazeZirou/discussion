@@ -9,6 +9,7 @@ import com.simple.discussion.test.util.deleteIssue
 import com.simple.discussion.test.util.getIssues
 import com.simple.discussion.test.util.postIssue
 import com.simple.discussion.test.util.putIssue
+import io.ktor.http.HttpHeaders.Location
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.withTestApplication
 import kotlinx.serialization.ImplicitReflectionSerializer
@@ -50,6 +51,7 @@ internal class IssueApiTest : KoinComponent {
 
         with(call) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.Created)
+            assertThat(response.headers[Location]).isEqualTo("/issues/${issue.id}")
             assertThat(issue.title).isEqualTo("test issue")
             assertThat(issue.description).isEqualTo("test description")
             assertThat(issue.labels).isEqualTo(listOf("新機能"))
