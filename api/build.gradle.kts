@@ -3,8 +3,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     application
     kotlin("jvm")
-    // これを指定しておかないと、kotlinx.serializationは実行時にエラーになる
-    kotlin("plugin.serialization") version Versions.kotlin
 }
 
 group = "com.simple.discussion"
@@ -35,12 +33,6 @@ dependencies {
     implementation(Deps.Kotlin.stdlibJvm)
     implementation(Deps.Ktor.serverNetty)
     implementation(Deps.Ktor.logback)
-
-    implementation(Deps.Database.H2)
-
-    implementation(Deps.Exposed.core)
-    implementation(Deps.Exposed.dao)
-    implementation(Deps.Exposed.jdbc)
 
     implementation(Deps.Ktor.serialization)
 
