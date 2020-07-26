@@ -125,4 +125,42 @@ internal class CommentApiTest : KoinComponent {
             assertThat(comments[0].description).isEqualTo("test comment2")
         }
     }
+
+    @Test
+    fun testDeleteComment() = withTestApplication({ module(testing = true) }) {
+        val issue = postIssue(Issue(
+            title = "test issue",
+            description = "test description",
+            labels = listOf()
+        ))
+
+        // Commentを投稿する
+        val postCommentCall = handleRequest(HttpMethod.Post, "/issues/${issue.id}/comments") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            val comment = Comment(description = "test comment")
+            setBody(Json.stringify(comment))
+        }
+        val postedComment = Json.parse(Comment.serializer(), postCommentCall.response.content!!)
+
+        // コメントを削除する
+        val deleteCommentCall = handleRequest(HttpMethod.Delete, "/issues/${issue.id}/comments/${postedComment.id}") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        }
+
+        // 更新結果を確認する
+        with(deleteCommentCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.NoContent)
+        }
+
+        // 実際に更新できたか確認する
+        val getCommentCall = handleRequest(HttpMethod.Get, "/issues/${issue.id}/comments") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        }
+
+        with(getCommentCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
+            val comments = Json.parseList<Comment>(response.content!!)
+            assertThat(comments).isEmpty()
+        }
+    }
 }

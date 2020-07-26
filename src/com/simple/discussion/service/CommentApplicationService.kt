@@ -26,6 +26,10 @@ object CommentApplicationService : KoinComponent {
     fun get(issueId: Int): List<Comment> {
         return repository.get(issueId)
     }
+
+    fun delete(commentId: Int) {
+        return repository.delete(commentId)
+    }
 }
 
 fun Routing.commentRoute() {
@@ -59,6 +63,13 @@ fun Routing.commentRoute() {
 
             val savedComment = CommentApplicationService.update(putComment)
             call.response.header(Location, "/issues/$issueId/comments/${savedComment.id}")
+            call.respond(HttpStatusCode.NoContent)
+        }
+
+        delete("{id}") {
+            val commentId = call.parameters["id"]?.toIntOrNull()
+            // TODO Parameterチェック
+            CommentApplicationService.delete(commentId!!)
             call.respond(HttpStatusCode.NoContent)
         }
     }

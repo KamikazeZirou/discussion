@@ -30,4 +30,8 @@ class ExposedCommentRepository : ICommentRepository {
         CommentEntity.find { CommentTable.issueId eq issueId }
             .map { it.toModel() }
     }
+
+    override fun delete(commentId: Int) = transaction {
+        CommentEntity[commentId].delete()
+    }
 }
