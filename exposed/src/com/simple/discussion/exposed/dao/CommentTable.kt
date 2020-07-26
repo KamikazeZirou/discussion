@@ -18,5 +18,6 @@ class CommentEntity(id: EntityID<Int>): IntEntity(id) {
     var description by CommentTable.description
     var issueId by  CommentTable.issueId
 
-    fun toModel(): Comment = Comment(id.value, description)
+    fun toModel(): Comment =
+        Comment(id.value, description)
 }

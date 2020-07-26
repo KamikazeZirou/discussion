@@ -41,11 +41,13 @@ internal class IssueApiTest : KoinComponent {
 
     @Test
     fun testPostIssue() = withTestApplication({ module(testing = true) }) {
-        val (call, issue) = postIssue(Issue(
-            title = "test issue",
-            description = "test description",
-            labels = listOf("新機能")
-        ))
+        val (call, issue) = postIssue(
+            Issue(
+                title = "test issue",
+                description = "test description",
+                labels = listOf("新機能")
+            )
+        )
 
         with(call) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.Created)
@@ -58,16 +60,21 @@ internal class IssueApiTest : KoinComponent {
 
     @Test
     fun testGetIssue() = withTestApplication({ module(testing = true) }) {
-        postIssue(Issue(
-            title = "test issue1",
-            description = "test description1",
-            labels = listOf("新機能")))
+        postIssue(
+            Issue(
+                title = "test issue1",
+                description = "test description1",
+                labels = listOf("新機能")
+            )
+        )
 
-        postIssue(Issue(
-            title = "test issue2",
-            description = "test description2",
-            labels = listOf("不具合", "優先度高")
-        ))
+        postIssue(
+            Issue(
+                title = "test issue2",
+                description = "test description2",
+                labels = listOf("不具合", "優先度高")
+            )
+        )
 
         val (call, issues) = getIssues()
 
@@ -85,10 +92,13 @@ internal class IssueApiTest : KoinComponent {
     @Test
     fun testPutIssue() = withTestApplication({ module(testing = true) }) {
         // Issue作成
-        val (_, postedIssue) = postIssue(Issue(
-            title = "test issue1",
-            description = "test description1",
-            labels = listOf("新機能")))
+        val (_, postedIssue) = postIssue(
+            Issue(
+                title = "test issue1",
+                description = "test description1",
+                labels = listOf("新機能")
+            )
+        )
 
         // Issue更新
         val putCall = putIssue(postedIssue.copy(
@@ -121,7 +131,9 @@ internal class IssueApiTest : KoinComponent {
             )
         )
 
-        postComment(postedIssue.id, Comment(description = "test comment"))
+        postComment(postedIssue.id,
+            Comment(description = "test comment")
+        )
 
         val deleteCall = deleteIssue(postedIssue.id)
         with(deleteCall) {

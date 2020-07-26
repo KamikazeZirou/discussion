@@ -41,14 +41,18 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testPostComment() = withTestApplication({ module(testing = true) }) {
-        val (_, issue) = postIssue(Issue(
-            title = "test issue",
-            description = "test description",
-            labels = listOf()
-        ))
+        val (_, issue) = postIssue(
+            Issue(
+                title = "test issue",
+                description = "test description",
+                labels = listOf()
+            )
+        )
 
         // Commentを投稿する
-        val (postCommentCall, postedComment) = postComment(issue.id, Comment(description = "test comment"))
+        val (postCommentCall, postedComment) = postComment(issue.id,
+            Comment(description = "test comment")
+        )
         with(postCommentCall) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.Created)
             assertThat(response.headers[HttpHeaders.Location]).isEqualTo("/issues/${issue.id}/comments/${postedComment.id}")
@@ -67,15 +71,21 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testGetComment() = withTestApplication({ module(testing = true) }) {
-        val (_, issue) = postIssue(Issue(
-            title = "test issue",
-            description = "test description",
-            labels = listOf()
-        ))
+        val (_, issue) = postIssue(
+            Issue(
+                title = "test issue",
+                description = "test description",
+                labels = listOf()
+            )
+        )
 
         // Commentを投稿する
-        val (_, postedComment1) = postComment(issue.id, Comment(description = "test comment1"))
-        val (_, postedComment2) = postComment(issue.id, Comment(description = "test comment2"))
+        val (_, postedComment1) = postComment(issue.id,
+            Comment(description = "test comment1")
+        )
+        val (_, postedComment2) = postComment(issue.id,
+            Comment(description = "test comment2")
+        )
 
         // 実際に投稿できているか確認する
         val (getCommentCall, comments) = getComments(issue.id)
@@ -90,14 +100,18 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testPutComment() = withTestApplication({ module(testing = true) }) {
-        val (_, issue) = postIssue(Issue(
-            title = "test issue",
-            description = "test description",
-            labels = listOf()
-        ))
+        val (_, issue) = postIssue(
+            Issue(
+                title = "test issue",
+                description = "test description",
+                labels = listOf()
+            )
+        )
 
         // Commentを投稿する
-        val (_, postedComment) = postComment(issue.id, Comment(description = "test comment"))
+        val (_, postedComment) = postComment(issue.id,
+            Comment(description = "test comment")
+        )
 
         // コメントを更新する
         val putCommentCall = putComment(issue.id, postedComment.copy(
@@ -118,14 +132,18 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testDeleteComment() = withTestApplication({ module(testing = true) }) {
-        val (_, issue) = postIssue(Issue(
-            title = "test issue",
-            description = "test description",
-            labels = listOf()
-        ))
+        val (_, issue) = postIssue(
+            Issue(
+                title = "test issue",
+                description = "test description",
+                labels = listOf()
+            )
+        )
 
         // Commentを投稿する
-        val (_, postedComment) = postComment(issue.id, Comment(description = "test comment"))
+        val (_, postedComment) = postComment(issue.id,
+            Comment(description = "test comment")
+        )
 
         // コメントを削除する
         val deleteCommentCall = deleteComment(issue.id, postedComment.id)

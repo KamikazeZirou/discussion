@@ -18,10 +18,11 @@ class IssueEntity(id: EntityID<Int>): IntEntity(id) {
     var description by IssueTable.description
     private val labels by LabelEntity referrersOn LabelTable.issue
 
-    fun toModel(): Issue = Issue(
-        id.value,
-        title,
-        description,
-        labels.map { it.value }
-    )
+    fun toModel(): Issue =
+        Issue(
+            id.value,
+            title,
+            description,
+            labels.map { it.value }
+        )
 }
