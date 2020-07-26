@@ -20,3 +20,8 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
       - name: Build with Gradle
         run: ./gradlew test
+      - name: Store test results
+        uses: actions/upload-artifact@v2
+        with:
+           name: reports
+           path: ./**/build/reports
