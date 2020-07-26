@@ -17,6 +17,7 @@ import io.ktor.server.testing.withTestApplication
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.parseList
 import kotlinx.serialization.stringify
 import org.junit.After
 import org.junit.Before
@@ -66,6 +67,49 @@ internal class CommentApiTest : KoinComponent {
             val comment = Json.parse(Comment.serializer(), response.content!!)
             assertThat(comment.id).isGreaterThan(0)
             assertThat(comment.description).isEqualTo("test comment")
+        }
+    }
+
+    @Test
+    fun testPutComment() = withTestApplication({ module(testing = true) }) {
+        val issue = postIssue(Issue(
+            title = "test issue",
+            description = "test description",
+            labels = listOf()
+        ))
+
+        // Commentを投稿する
+        val postCommentCall = handleRequest(HttpMethod.Post, "/issues/${issue.id}/comments") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            val comment = Comment(description = "test comment")
+            setBody(Json.stringify(comment))
+        }
+        val postedComment = Json.parse(Comment.serializer(), postCommentCall.response.content!!)
+
+        // コメントを更新する
+        val putCommentCall = handleRequest(HttpMethod.Put, "/issues/${issue.id}/comments/${postedComment.id}") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+            val comment = postedComment.copy(
+                description = "test comment2"
+            )
+            setBody(Json.stringify(comment))
+        }
+
+        // 更新結果を確認する
+        with(putCommentCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.NoContent)
+        }
+
+        // 実際に更新できたか確認する
+        val getCommentCall = handleRequest(HttpMethod.Get, "/issues/${issue.id}/comments") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        }
+
+        with(getCommentCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
+            val comments = Json.parseList<Comment>(response.content!!)
+            assertThat(comments[0].id).isEqualTo(postedComment.id)
+            assertThat(comments[0].description).isEqualTo("test comment2")
         }
     }
 }

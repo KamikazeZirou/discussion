@@ -16,4 +16,18 @@ class ExposedCommentRepository : ICommentRepository {
             this.issueId = issueId
         }.toModel()
     }
+
+    override fun update(comment: Comment): Comment = transaction {
+        SchemaUtils.create(CommentTable)
+
+        CommentEntity[comment.id].apply {
+            description = comment.description
+            flush()
+        }.toModel()
+    }
+
+    override fun get(issueId: Int): List<Comment> = transaction {
+        CommentEntity.find { CommentTable.issueId eq issueId }
+            .map { it.toModel() }
+    }
 }

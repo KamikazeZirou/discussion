@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 buildscript {
     repositories {
         jcenter()
@@ -22,11 +24,17 @@ application {
     mainClassName = "io.ktor.server.netty.EngineMain"
 }
 
+tasks.withType<KotlinCompile>().all {
+    kotlinOptions {
+        freeCompilerArgs = freeCompilerArgs + "-Xopt-in=kotlin.RequiresOptIn"
+    }
+}
+
 sourceSets {
     getByName("main").java.srcDirs("src")
-    getByName("test").java.srcDirs("test")
     getByName("main").resources.srcDirs("resources")
-    getByName("test").resources.srcDirs("testresources")
+    getByName("test").java.srcDirs("test")
+    getByName("test").resources.srcDirs("test/resources")
 }
 
 repositories {
