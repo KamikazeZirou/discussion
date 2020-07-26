@@ -48,7 +48,7 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testPostComment() = withTestApplication({ module(testing = true) }) {
-        val issue = postIssue(Issue(
+        val (_, issue) = postIssue(Issue(
             title = "test issue",
             description = "test description",
             labels = listOf()
@@ -85,7 +85,7 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testPutComment() = withTestApplication({ module(testing = true) }) {
-        val issue = postIssue(Issue(
+        val (_, issue) = postIssue(Issue(
             title = "test issue",
             description = "test description",
             labels = listOf()
@@ -128,7 +128,7 @@ internal class CommentApiTest : KoinComponent {
 
     @Test
     fun testDeleteComment() = withTestApplication({ module(testing = true) }) {
-        val issue = postIssue(Issue(
+        val (_, issue) = postIssue(Issue(
             title = "test issue",
             description = "test description",
             labels = listOf()

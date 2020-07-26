@@ -5,19 +5,14 @@ import com.simple.discussion.database.IDatabase
 import com.simple.discussion.di.issueModule
 import com.simple.discussion.model.Issue
 import com.simple.discussion.module
+import com.simple.discussion.test.util.deleteIssue
+import com.simple.discussion.test.util.getIssues
 import com.simple.discussion.test.util.postIssue
-import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
+import com.simple.discussion.test.util.putIssue
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.setBody
 import io.ktor.server.testing.withTestApplication
 import kotlinx.serialization.ImplicitReflectionSerializer
 import kotlinx.serialization.UnstableDefault
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.parseList
-import kotlinx.serialization.stringify
 import org.junit.After
 import org.junit.Before
 import org.koin.core.KoinComponent
@@ -47,19 +42,14 @@ internal class IssueApiTest : KoinComponent {
 
     @Test
     fun testPostIssue() = withTestApplication({ module(testing = true) }) {
-        val call = handleRequest(HttpMethod.Post, "/issues") {
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = Issue(
-                title = "test issue",
-                description = "test description",
-                labels = listOf("新機能")
-            )
-            setBody(Json.stringify(issue))
-        }
+        val (call, issue) = postIssue(Issue(
+            title = "test issue",
+            description = "test description",
+            labels = listOf("新機能")
+        ))
 
         with(call) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.Created)
-            val issue = Json.parse(Issue.serializer(), response.content!!)
             assertThat(issue.title).isEqualTo("test issue")
             assertThat(issue.description).isEqualTo("test description")
             assertThat(issue.labels).isEqualTo(listOf("新機能"))
@@ -79,11 +69,10 @@ internal class IssueApiTest : KoinComponent {
             labels = listOf("不具合", "優先度高")
         ))
 
-        val call = handleRequest(HttpMethod.Get, "/issues") {}
+        val (call, issues) = getIssues()
 
         with(call) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
-            val issues = Json.parseList<Issue>(response.content!!)
             assertThat(issues[0].title).isEqualTo("test issue1")
             assertThat(issues[0].description).isEqualTo("test description1")
             assertThat(issues[0].labels).isEqualTo(listOf("新機能"))
@@ -95,30 +84,27 @@ internal class IssueApiTest : KoinComponent {
 
     @Test
     fun testPutIssue() = withTestApplication({ module(testing = true) }) {
-        val postedIssue = postIssue(Issue(
+        // Issue作成
+        val (_, postedIssue) = postIssue(Issue(
             title = "test issue1",
             description = "test description1",
             labels = listOf("新機能")))
 
-        val putCall = handleRequest(HttpMethod.Put, "/issues/${postedIssue.id}") {
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-            val issue = postedIssue.copy(
-                title = "test issue2",
-                description = "test description2",
-                labels = listOf()
-            )
-            setBody(Json.stringify(issue))
-        }
+        // Issue更新
+        val putCall = putIssue(postedIssue.copy(
+            title = "test issue2",
+            description = "test description2",
+            labels = listOf()
+        ))
 
         with(putCall) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.NoContent)
         }
 
-        val getCall = handleRequest(HttpMethod.Get, "/issues") {}
-
+        // 実際にIssueが更新できているか
+        val (getCall, issues) = getIssues()
         with(getCall) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
-            val issues = Json.parseList<Issue>(response.content!!)
             assertThat(issues[0].title).isEqualTo("test issue2")
             assertThat(issues[0].description).isEqualTo("test description2")
             assertThat(issues[0].labels).isEqualTo(listOf<String>())
@@ -127,7 +113,7 @@ internal class IssueApiTest : KoinComponent {
 
     @Test
     fun testDeleteIssue() = withTestApplication({ module(testing = true) }) {
-        val postedIssue = postIssue(
+        val (_, postedIssue) = postIssue(
             Issue(
                 title = "test issue1",
                 description = "test description1",
@@ -135,19 +121,14 @@ internal class IssueApiTest : KoinComponent {
             )
         )
 
-        val deleteCall = handleRequest(HttpMethod.Delete, "/issues/${postedIssue.id}") {
-            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-        }
-
+        val deleteCall = deleteIssue(postedIssue.id)
         with(deleteCall) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.NoContent)
         }
 
-        val getCall = handleRequest(HttpMethod.Get, "/issues") {}
-
+        val (getCall, issues) = getIssues()
         with(getCall) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
-            val issues = Json.parseList<Issue>(response.content!!)
             assertThat(issues).isEmpty()
         }
     }
