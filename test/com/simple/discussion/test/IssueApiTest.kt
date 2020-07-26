@@ -3,12 +3,10 @@ package com.simple.discussion.test
 import com.google.common.truth.Truth.assertThat
 import com.simple.discussion.database.IDatabase
 import com.simple.discussion.di.issueModule
+import com.simple.discussion.model.Comment
 import com.simple.discussion.model.Issue
 import com.simple.discussion.module
-import com.simple.discussion.test.util.deleteIssue
-import com.simple.discussion.test.util.getIssues
-import com.simple.discussion.test.util.postIssue
-import com.simple.discussion.test.util.putIssue
+import com.simple.discussion.test.util.*
 import io.ktor.http.HttpHeaders.Location
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.withTestApplication
@@ -122,6 +120,8 @@ internal class IssueApiTest : KoinComponent {
                 labels = listOf("新機能")
             )
         )
+
+        postComment(postedIssue.id, Comment(description = "test comment"))
 
         val deleteCall = deleteIssue(postedIssue.id)
         with(deleteCall) {

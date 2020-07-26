@@ -5,10 +5,11 @@ import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption
 
 object CommentTable: IntIdTable() {
     val description = text("description")
-    val issueId = integer("issue_id").references(IssueTable.id)
+    val issueId = integer("issue_id").references(IssueTable.id, onDelete = ReferenceOption.CASCADE)
 }
 
 class CommentEntity(id: EntityID<Int>): IntEntity(id) {
