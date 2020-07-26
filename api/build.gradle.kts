@@ -5,9 +5,6 @@ plugins {
     kotlin("jvm")
 }
 
-group = "com.simple.discussion"
-version = "0.0.1"
-
 application {
     @Suppress("UnstableApiUsage")
     mainClassName = "io.ktor.server.netty.EngineMain"
