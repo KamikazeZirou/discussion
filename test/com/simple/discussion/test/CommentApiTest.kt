@@ -62,11 +62,24 @@ internal class CommentApiTest : KoinComponent {
         }
 
         // Commentを投稿できたか確認する
+        var postedComment: Comment
         with(postCommentCall) {
             assertThat(response.status()).isEqualTo(HttpStatusCode.Created)
-            val comment = Json.parse(Comment.serializer(), response.content!!)
-            assertThat(comment.id).isGreaterThan(0)
-            assertThat(comment.description).isEqualTo("test comment")
+            postedComment = Json.parse(Comment.serializer(), response.content!!)
+            assertThat(postedComment.id).isGreaterThan(0)
+            assertThat(postedComment.description).isEqualTo("test comment")
+        }
+
+        // Getしたら取得できるか
+        val getCommentCall = handleRequest(HttpMethod.Get, "/issues/${issue.id}/comments") {
+            addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+        }
+
+        with(getCommentCall) {
+            assertThat(response.status()).isEqualTo(HttpStatusCode.OK)
+            val comments = Json.parseList<Comment>(response.content!!)
+            assertThat(comments[0].id).isEqualTo(postedComment.id)
+            assertThat(comments[0].description).isEqualTo("test comment")
         }
     }
 
