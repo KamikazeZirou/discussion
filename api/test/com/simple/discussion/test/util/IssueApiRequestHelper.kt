@@ -29,7 +29,7 @@ fun TestApplicationEngine.postIssue(issue: Issue): Pair<ApplicationCall, Issue> 
 @OptIn(ImplicitReflectionSerializer::class)
 fun TestApplicationEngine.getIssues(): Pair<TestApplicationCall, List<Issue>> {
     val call = handleRequest(HttpMethod.Get, "/issues") {}
-    return call to Json.parseList<Issue>(call.response.content!!)
+    return call to Json.parseList(call.response.content!!)
 }
 
 @UnstableDefault

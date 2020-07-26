@@ -30,7 +30,7 @@ fun TestApplicationEngine.getComments(issueId: Int): Pair<ApplicationCall, List<
     val call = handleRequest(HttpMethod.Get, "/issues/$issueId/comments") {
         addHeader(HttpHeaders.ContentType, ContentType.Application.Json.toString())
     }
-    return call to Json.parseList<Comment>(call.response.content!!)
+    return call to Json.parseList(call.response.content!!)
 }
 
 @UnstableDefault
