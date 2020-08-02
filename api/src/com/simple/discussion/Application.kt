@@ -7,8 +7,11 @@ import com.simple.discussion.service.issueRoute
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
+import io.ktor.features.CORS
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.response.respondText
 import io.ktor.routing.Routing
 import io.ktor.routing.get
@@ -36,6 +39,19 @@ fun Application.module(testing: Boolean = false) {
         json(
             contentType = ContentType.Application.Json
         )
+    }
+
+    install(CORS) {
+        methods += setOf(
+            HttpMethod.Get,
+            HttpMethod.Put,
+            HttpMethod.Put,
+            HttpMethod.Delete,
+            HttpMethod.Options
+        )
+        header(HttpHeaders.AccessControlAllowOrigin)
+        host("localhost:8081")
+        allowCredentials = true
     }
 
     routing {
