@@ -44,7 +44,7 @@ fun Application.module(testing: Boolean = false) {
     install(CORS) {
         methods += setOf(
             HttpMethod.Get,
-            HttpMethod.Put,
+            HttpMethod.Post,
             HttpMethod.Put,
             HttpMethod.Delete,
             HttpMethod.Options
