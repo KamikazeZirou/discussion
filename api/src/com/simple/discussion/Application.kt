@@ -49,6 +49,7 @@ fun Application.module(testing: Boolean = false) {
             HttpMethod.Delete,
             HttpMethod.Options
         )
+        header(HttpHeaders.ContentType)
         header(HttpHeaders.AccessControlAllowOrigin)
         host("localhost:8081")
         allowCredentials = true
